@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Chat</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- <link href="css/style.css" rel="stylesheet"> -->
+        <script src="./socket.io/socket.io.js"></script>
+        <style>
+          .btn_submit{
+            padding: 1.3em 3em;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            font-weight: 500;
+            color: #000;
+            background-color: #fff;
+            border: none;
+            border-radius: 45px;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease 0s;
+            cursor: pointer;
+            outline: none;
+          }
+          .users{
+            border: none;
+            border-radius: 10px;
+            width: 300px;
+          }
+          #container_chat.active>div:last-of-type, #container_chat>div:first-of-type{
+            display: block;
+          }
+          #container_chat>div:last-of-type, #container_chat.active>div:first-of-type{
+            display: none;
+          }
+          #data_user{
+            padding: 20px 35px;
+          }
+          input {
+            width: 98%;
+            height: 3em;
+            max-height: 100%;
+            outline: none;
+            /* padding: 0 10px; */
+            border: 1px solid #c3c6ce;
+            position: relative;
+            border-radius: 5px;
+            padding-inline-start: 12px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            line-height: 1.129px;
+            font-size: 16px;
+            background-color: #ffffff;
+            color: black;
+            margin: 20px 0px;
+          }
+          input::placeholder{
+            color: #fff;
+          }
+          
+          
+           
+           
+        </style>
+    </head>
+    <body style="padding-top: 40px;">
+        <!-- <h1>Tutorial de Sockets</h1>
+        <input type="text" name="name" id="name">
+        <p id="parrafo"></p> -->
+        <h1 style="text-align: center;
+        font-family: sans-serif;">Chat con WebSockets</h1>
+        <div id="container_chat">
+          <div style="
+          text-align: center;
+          max-width: 700px;
+          background: #ececec;
+          width: 100%;
+          margin: 0px auto;
+          border-radius: 5px;">
+            <form id="data_user">
+              <input type="text" name="name_user" placeholder="Name">
+              <input type="text" name="email_user" placeholder="Email">
+              <input class="btn_submit" type="submit" value="Ingresar al chat" >
+            </form>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-around; max-width: 800px; width:100%;">
+              <div style="width: calc(100%- 300px); padding: 0px 20px 0px 0px;">
+                <input type="text" name="inputtext" id="inputtext" placeholder="Ingresa tu mensaje">
+                <button id="send_socket">Enviar</button>
+                <p id="parrafochat" style="background-color: #e2e2e2; color:black; padding: 20px 25px; display:block"></p>
+              </div>
+              <div class="users">
+                Hacer despues...
+              </div>
+            </div>
+          </div>
+        </div>
+        <script>
+          let socket = null;
+          let student = null;
+          let inputtext = document.getElementById("inputtext");
+          let send_socket = document.getElementById("send_socket");
+          let container_chat = document.getElementById("container_chat");
+          let parrafochat = document.getElementById("parrafochat");
+          let form_data_user = document.getElementById("data_user");
+          form_data_user.addEventListener("submit", evt =>{
+            evt.preventDefault();
+            student = {
+              name: evt.target[0].value,
+              email: evt.target[1].value
+            }
+            if(student.name == "" || student.email == "") window.location.reload();
+            socket = io();
+            socket.emit("addUser", student);
+            container_chat.classList = "active";
+            readSockets();
+        });
+  
+  
+        function readSockets(){
+          loadChat();
+          socket.on("listenserver", data =>{
+            console.log("Recibiendo..", data);
+            loadData(data);
+          });
+        }
+  
+        function loadChat(){
+          socket.on("init", data => {
+            loadData(data);
+          })
+
+          socket.on("loadUsers", data =>{
+            console.log("Evento loadUsers --> ",data);
+          })
+        }
+  
+        function loadData(data){
+          let innerP = ``;
+            data.forEach(element =>{
+              innerP += `<b>${element.name}:</b> ${element.sms} </br>`;
+            });
+            parrafochat.innerHTML = innerP;
+        }
+  
+        send_socket.addEventListener("click", evt =>{
+          let sendMessage = {
+            ...student,
+            sms: inputtext.value
+          }
+          socket.emit("mensaje", sendMessage);
+          inputtext.value = "";
+        });
+  
+  
+  
+  
+  
+  
+          /*
+            let name = document.getElementById("name");
+            let parrafo = document.getElementById("parrafo");
+            // let socket = io();
+            socket.on("init", data => {
+                console.log( `Me han enviado un mensaje desde el server ---> `);
+                console.log(data);
+            })
+            name.addEventListener("keyup", evt =>{
+                console.log(evt.target.value);
+                socket.emit("keyup", evt.target.value);
+            })
+  
+            socket.on("fillP", data => {
+                parrafo.innerHTML = data;
+            })        
+          */
+  
+  
+          
+      </script>
+    </body>
+    
+</html>
